@@ -10,6 +10,16 @@ loki:
     fsGroupChangePolicy: "OnRootMismatch"
   commonConfig:
     replication_factor: 1
+    storage: # Directly configure common.storage.s3
+      s3:
+        bucketnames: YOUR_S3_BUCKET_NAME_HERE # Replace with your S3 bucket name
+        region: YOUR_AWS_REGION_HERE       # Replace with your AWS region (e.g., us-east-1)
+        # s3forcepathstyle: false # Set to true for S3-compatible services that require path-style access
+        # For EKS, IRSA (IAM Roles for Service Accounts) is recommended for S3 access.
+        # Ensure the serviceAccount used by Loki has the correct IAM role ARN.
+        # If not using IRSA, you would configure access_key_id and secret_access_key here:
+        # access_key_id: YOUR_AWS_ACCESS_KEY_ID
+        # secret_access_key: YOUR_AWS_SECRET_ACCESS_KEY
   schemaConfig:
     configs:
     - from: "2024-04-01"
@@ -19,22 +29,14 @@ loki:
       index:
         prefix: loki_index_
         period: 24h
-  # Configure storage for Loki using the dedicated storageConfig helper.
-  # This defines the 's3' object store for chunks and the 'tsdb_shipper' for the index.
+  # Configure storage for Loki.
+  # commonConfig.storage.s3 is now used for S3 bucket details.
+  # tsdb_shipper configuration remains here.
   storageConfig:
-    aws: # This section defines an S3 backend, implicitly named 's3' by the chart.
-      # s3: null # This will be constructed by the chart if bucketnames and region are set
-      bucketnames: YOUR_S3_BUCKET_NAME_HERE # Replace with your S3 bucket name
-      region: YOUR_AWS_REGION_HERE       # Replace with your AWS region (e.g., us-east-1)
-      # s3forcepathstyle: false # Set to true for S3-compatible services that require path-style access
-      # For EKS, IRSA (IAM Roles for Service Accounts) is recommended for S3 access.
-      # Ensure the serviceAccount used by Loki has the correct IAM role ARN.
-      # If not using IRSA, you would configure access_key_id and secret_access_key here:
-      # access_key_id: YOUR_AWS_ACCESS_KEY_ID
-      # secret_access_key: YOUR_AWS_SECRET_ACCESS_KEY
+    # The 'aws' section has been removed as S3 details are now in commonConfig.storage.s3
     tsdb_shipper:
       active_index_directory: /var/loki/tsdb-index # Path on the PVC for active TSDB index files
-      shared_store: s3 # Tells tsdb_shipper to use the 's3' object store defined above (via 'aws' config)
+      shared_store: s3 # Tells tsdb_shipper to use the 's3' object store defined in commonConfig.storage.s3
       # cache_location: /var/loki/tsdb-cache # Optional: Local cache for TSDB shipper, path on PVC
   persistence:
     enabled: true
