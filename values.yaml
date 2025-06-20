@@ -58,6 +58,9 @@ promtail:
     lokiAddress: http://loki:3100/loki/api/v1/push
 grafana:
   enabled: true
+  # initChownData.enabled: false explicitly disables the init container responsible for chown.
+  initChownData:
+    enabled: false
   sidecar:
     datasources:
       enabled: true
