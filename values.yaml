@@ -16,7 +16,7 @@ loki:
   persistence:
     enabled: true
     size: 5Gi
-    storageClassName: standard # Replace with your StorageClass if different
+    storageClassName: efs-sc # Replace with your StorageClass if different
   deploymentMode: SingleBinary
   singleBinary:
     replicas: 1
@@ -34,7 +34,7 @@ grafana:
   persistence:
     enabled: true
     size: 3Gi
-    storageClassName: standard # Replace with your StorageClass
+    storageClassName: efs-sc # Replace with your StorageClass
   adminUser: admin
   adminPassword: adminadminadmin # Change for production
 fluent-bit:
