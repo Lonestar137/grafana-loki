@@ -26,6 +26,26 @@ loki:
   deploymentMode: SingleBinary
   singleBinary:
     replicas: 1
+
+  # Explicitly configure liveness and readiness probes for Loki
+  # to ensure they target the correct port and path.
+  livenessProbe:
+    httpGet:
+      path: /ready  # Standard Loki health endpoint
+      port: 3100    # Loki's default HTTP port
+    initialDelaySeconds: 60 # Increased delay to allow Loki to start, especially with S3 backend
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    httpGet:
+      path: /ready  # Standard Loki health endpoint
+      port: 3100    # Loki's default HTTP port
+    initialDelaySeconds: 30 # Shorter delay for readiness, but still allowing startup
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
   # Service Account configuration for IRSA (IAM Roles for Service Accounts)
   # Ensure you have created an IAM role with permissions to access your S3 bucket
   # and replace the placeholder ARN below.
