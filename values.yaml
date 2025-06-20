@@ -19,6 +19,23 @@ loki:
       index:
         prefix: loki_index_
         period: 24h
+  # Configure storage for Loki using the dedicated storageConfig helper.
+  # This defines the 's3' object store for chunks and the 'tsdb_shipper' for the index.
+  storageConfig:
+    aws: # This section defines an S3 backend, implicitly named 's3' by the chart.
+      # s3: null # This will be constructed by the chart if bucketnames and region are set
+      bucketnames: YOUR_S3_BUCKET_NAME_HERE # Replace with your S3 bucket name
+      region: YOUR_AWS_REGION_HERE       # Replace with your AWS region (e.g., us-east-1)
+      # s3forcepathstyle: false # Set to true for S3-compatible services that require path-style access
+      # For EKS, IRSA (IAM Roles for Service Accounts) is recommended for S3 access.
+      # Ensure the serviceAccount used by Loki has the correct IAM role ARN.
+      # If not using IRSA, you would configure access_key_id and secret_access_key here:
+      # access_key_id: YOUR_AWS_ACCESS_KEY_ID
+      # secret_access_key: YOUR_AWS_SECRET_ACCESS_KEY
+    tsdb_shipper:
+      active_index_directory: /var/loki/tsdb-index # Path on the PVC for active TSDB index files
+      shared_store: s3 # Tells tsdb_shipper to use the 's3' object store defined above (via 'aws' config)
+      # cache_location: /var/loki/tsdb-cache # Optional: Local cache for TSDB shipper, path on PVC
   persistence:
     enabled: true
     size: 5Gi
@@ -54,21 +71,7 @@ loki:
     name: loki # Name of the service account, adjust if needed
     annotations:
       eks.amazonaws.com/role-arn: "arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/YOUR_LOKI_S3_ACCESS_ROLE_NAME" # Replace with your IAM role ARN
-  # Configuration for Loki itself, including storage backend
-  config:
-    storage_config:
-      aws:
-        s3: null # s3://<region>/<bucketname> - this will be constructed if bucketnames and region are set
-        bucketnames: YOUR_S3_BUCKET_NAME_HERE # Replace with your S3 bucket name
-        region: YOUR_AWS_REGION_HERE       # Replace with your AWS region (e.g., us-east-1)
-        # s3forcepathstyle: false # Set to true for S3-compatible services that require path-style access
-        # For EKS, it's recommended to use IAM Roles for Service Accounts (IRSA)
-        # to grant Loki pods permissions to access the S3 bucket.
-        # If not using IRSA, you would configure access_key_id and secret_access_key here.
-        # access_key_id: YOUR_AWS_ACCESS_KEY_ID
-        # secret_access_key: YOUR_AWS_SECRET_ACCESS_KEY
-    # schema_config is already defined above and correctly points to 's3' object_store
-    # compactor, ingester, querier, etc. configurations can also go here if needed.
+  # The 'loki.config' section has been removed in favor of 'loki.storageConfig' for S3 settings.
 
 minio:
   enabled: false # Disabling Minio as we are using AWS S3
