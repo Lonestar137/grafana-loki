@@ -20,8 +20,24 @@ loki:
   deploymentMode: SingleBinary
   singleBinary:
     replicas: 1
+  # Configuration for Loki itself, including storage backend
+  config:
+    storage_config:
+      aws:
+        s3: null # s3://<region>/<bucketname> - this will be constructed if bucketnames and region are set
+        bucketnames: YOUR_S3_BUCKET_NAME_HERE # Replace with your S3 bucket name
+        region: YOUR_AWS_REGION_HERE       # Replace with your AWS region (e.g., us-east-1)
+        # s3forcepathstyle: false # Set to true for S3-compatible services that require path-style access
+        # For EKS, it's recommended to use IAM Roles for Service Accounts (IRSA)
+        # to grant Loki pods permissions to access the S3 bucket.
+        # If not using IRSA, you would configure access_key_id and secret_access_key here.
+        # access_key_id: YOUR_AWS_ACCESS_KEY_ID
+        # secret_access_key: YOUR_AWS_SECRET_ACCESS_KEY
+    # schema_config is already defined above and correctly points to 's3' object_store
+    # compactor, ingester, querier, etc. configurations can also go here if needed.
+
 minio:
-  enabled: true
+  enabled: false # Disabling Minio as we are using AWS S3
 promtail:
   enabled: true
   config:
