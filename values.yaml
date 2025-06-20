@@ -1,0 +1,47 @@
+# helm upgrade --install loki grafana/loki-stack -f values.yaml
+loki:
+  enabled: true
+  isDefault: true
+  commonConfig:
+    replication_factor: 1
+  schemaConfig:
+    configs:
+    - from: "2024-04-01"
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index:
+        prefix: loki_index_
+        period: 24h
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClassName: standard # Replace with your StorageClass if different
+  deploymentMode: SingleBinary
+  singleBinary:
+    replicas: 1
+minio:
+  enabled: true
+promtail:
+  enabled: true
+  config:
+    lokiAddress: http://loki:3100/loki/api/v1/push
+grafana:
+  enabled: true
+  sidecar:
+    datasources:
+      enabled: true
+  persistence:
+    enabled: true
+    size: 3Gi
+    storageClassName: standard # Replace with your StorageClass
+  adminUser: admin
+  adminPassword: adminadminadmin # Change for production
+fluent-bit:
+  enabled: false
+filebeat:
+  enabled: false
+logstash:
+  enabled: false
+prometheus:
+  enabled: false
