@@ -2,6 +2,12 @@
 loki:
   enabled: true
   isDefault: true
+  # Pod-level security context for Loki
+  # fsGroupChangePolicy: "OnRootMismatch" prevents chown on every startup if permissions already match fsGroup.
+  # The fsGroup 10001 is a common default for Loki. Verify this for your setup.
+  podSecurityContext:
+    fsGroup: 10001
+    fsGroupChangePolicy: "OnRootMismatch"
   commonConfig:
     replication_factor: 1
   schemaConfig:
@@ -57,6 +63,7 @@ grafana:
       enabled: true
   persistence:
     enabled: true
+    chownOnStart: false # Disables the chown operation in the init container for Grafana persistence
     size: 3Gi
     storageClassName: efs-sc # Replace with your StorageClass
   adminUser: admin
